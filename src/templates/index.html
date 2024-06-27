@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Algo Trading Backtest</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+        .form-backtest {
+            max-width: 600px;
+            padding: 15px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .form-backtest .form-heading,
+        .form-backtest .checkbox {
+            margin-bottom: 10px;
+        }
+        .form-backtest .checkbox {
+            font-weight: normal;
+        }
+        .form-backtest .form-control {
+            position: relative;
+            height: auto;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .form-backtest .form-control:focus {
+            z-index: 2;
+        }
+        .form-backtest button {
+            margin-top: 10px;
+        }
+        .result-table {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-backtest">
+            <h2 class="form-heading text-center">Algo Trading Backtest</h2>
+            <form action="/backtest" method="get">
+                <div class="form-group">
+                    <label for="ticker">Ticker:</label>
+                    <select id="ticker" name="ticker" class="form-control" required>
+                        <option value="BTC-EUR" {% if request.args.get('ticker') == 'BTC-EUR' %}selected{% endif %}>BTC - Bitcoin</option>
+                        <option value="ETH-EUR" {% if request.args.get('ticker') == 'ETH-EUR' %}selected{% endif %}>ETH - Ethereum</option>
+                        <option value="BNB-EUR" {% if request.args.get('ticker') == 'BNB-EUR' %}selected{% endif %}>BNB - Binance Coin</option>
+                        <option value="XRP-EUR" {% if request.args.get('ticker') == 'XRP-EUR' %}selected{% endif %}>XRP - Ripple</option>
+                        <option value="ADA-EUR" {% if request.args.get('ticker') == 'ADA-EUR' %}selected{% endif %}>ADA - Cardano</option>
+                        <option value="SOL-EUR" {% if request.args.get('ticker') == 'SOL-EUR' %}selected{% endif %}>SOL - Solana</option>
+                        <option value="DOGE-EUR" {% if request.args.get('ticker') == 'DOGE-EUR' %}selected{% endif %}>DOGE - Dogecoin</option>
+                        <option value="DOT-EUR" {% if request.args.get('ticker') == 'DOT-EUR' %}selected{% endif %}>DOT - Polkadot</option>
+                        <option value="LTC-EUR" {% if request.args.get('ticker') == 'LTC-EUR' %}selected{% endif %}>LTC - Litecoin</option>
+                        <option value="LINK-EUR" {% if request.args.get('ticker') == 'LINK-EUR' %}selected{% endif %}>LINK - Chainlink</option>
+                        <option value="BCH-EUR" {% if request.args.get('ticker') == 'BCH-EUR' %}selected{% endif %}>BCH - Bitcoin Cash</option>
+                        <option value="UNI-EUR" {% if request.args.get('ticker') == 'UNI-EUR' %}selected{% endif %}>UNI - Uniswap</option>
+                        <option value="XLM-EUR" {% if request.args.get('ticker') == 'XLM-EUR' %}selected{% endif %}>XLM - Stellar</option>
+                        <option value="MATIC-EUR" {% if request.args.get('ticker') == 'MATIC-EUR' %}selected{% endif %}>MATIC - Polygon</option>
+                        <option value="AVAX-EUR" {% if request.args.get('ticker') == 'AVAX-EUR' %}selected{% endif %}>AVAX - Avalanche</option>
+                        <option value="AXS-EUR" {% if request.args.get('ticker') == 'AXS-EUR' %}selected{% endif %}>AXS - Axie Infinity</option>
+                        <option value="SHIB-EUR" {% if request.args.get('ticker') == 'SHIB-EUR' %}selected{% endif %}>SHIB - Shiba Inu</option>
+                        <option value="VET-EUR" {% if request.args.get('ticker') == 'VET-EUR' %}selected{% endif %}>VET - VeChain</option>
+                        <option value="FTT-EUR" {% if request.args.get('ticker') == 'FTT-EUR' %}selected{% endif %}>FTT - FTX Token</option>
+                        <option value="CRO-EUR" {% if request.args.get('ticker') == 'CRO-EUR' %}selected{% endif %}>CRO - Crypto.com Coin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.args.get('start_date', '2015-01-01') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.args.get('end_date', '2020-01-01') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="short_window">Short Window:</label>
+                    <input type="number" id="short_window" name="short_window" class="form-control" value="{{ request.args.get('short_window', '40') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="long_window">Long Window:</label>
+                    <input type="number" id="long_window" name="long_window" class="form-control" value="{{ request.args.get('long_window', '100') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="strategy">Strategy:</label>
+                    <select id="strategy" name="strategy" class="form-control" required>
+                        <option value="sma" {% if request.args.get('strategy') == 'sma' %}selected{% endif %}>Simple Moving Average (SMA)</option>
+                        <option value="ema" {% if request.args.get('strategy') == 'ema' %}selected{% endif %}>Exponential Moving Average (EMA)</option>
+                        <option value="rsi" {% if request.args.get('strategy') == 'rsi' %}selected{% endif %}>Relative Strength Index (RSI)</option>
+                        <option value="macd" {% if request.args.get('strategy') == 'macd' %}selected{% endif %}>Moving Average Convergence Divergence (MACD)</option>
+                        <option value="bollinger_bands" {% if request.args.get('strategy') == 'bollinger_bands' %}selected{% endif %}>Bollinger Bands</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Run Backtest</button>
+            </form>
+            {% if result %}
+            <h3 class="text-center">Backtest Results:</h3>
+            <table class="table table-striped result-table">
+                <tr>
+                    <th>Ticker</th>
+                    <td>{{ result.ticker }}</td>
+                </tr>
+                <tr>
+                    <th>Start Date</th>
+                    <td>{{ result.start_date }}</td>
+                </tr>
+                <tr>
+                    <th>End Date</th>
+                    <td>{{ result.end_date }}</td>
+                </tr>
+                <tr>
+                    <th>Short Window</th>
+                    <td>{{ result.short_window }}</td>
+                </tr>
+                <tr>
+                    <th>Long Window</th>
+                    <td>{{ result.long_window }}</td>
+                </tr>
+                <tr>
+                    <th>Strategy</th>
+                    <td>{{ result.strategy }}</td>
+                </tr>
+                <tr>
+                    <th>Cumulative Return</th>
+                    <td>{{ result.cumulative_return }}</td>
+                </tr>
+            </table>
+            <div class="text-center">
+                <img src="{{ result.plot_path }}" alt="Plot" class="img-fluid">
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
