@@ -4,3 +4,5 @@ matplotlib
 yfinance
 ta
 flask
+keras
+scikit-learn

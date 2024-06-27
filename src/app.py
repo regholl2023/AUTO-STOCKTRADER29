@@ -1,9 +1,11 @@
+from turtle import pd
 from flask import Flask, request, jsonify, render_template, send_file
 import os
 import matplotlib.pyplot as plt
 from utils.data_loader import load_data, preprocess_data
 from strategy import sma_strategy, ema_strategy, rsi_strategy, macd_strategy, bollinger_bands_strategy
 from utils.performance import calculate_performance
+from models.model import train_lstm
 
 app = Flask(__name__)
 
@@ -13,10 +15,10 @@ def index():
 
 @app.route('/backtest', methods=['GET'])
 def backtest():
-    ticker = request.args.get('ticker')
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    strategy = request.args.get('strategy')
+    ticker = request.args.get('ticker', 'AAPL')
+    start_date = request.args.get('start_date', '2015-01-01')
+    end_date = request.args.get('end_date', '2020-01-01')
+    strategy = request.args.get('strategy', 'sma')
     
     try:
         short_window = int(request.args.get('short_window', 40))
@@ -37,6 +39,9 @@ def backtest():
         signals = macd_strategy(data)
     elif strategy == 'bollinger_bands':
         signals = bollinger_bands_strategy(data)
+    elif strategy == 'lstm':
+        model, scaler, train_predict, test_predict = train_lstm(data)
+        signals = pd.DataFrame(data={'price': data['Adj Close'], 'train_predict': train_predict.flatten(), 'test_predict': test_predict.flatten()}, index=data.index)
     else:
         return jsonify({"error": "Invalid strategy selected"}), 400
 
@@ -76,6 +81,9 @@ def create_plot(data, signals, ticker, strategy):
     if 'upper_band' in signals.columns and 'lower_band' in signals.columns:
         plt.plot(signals['upper_band'], label='Upper Bollinger Band')
         plt.plot(signals['lower_band'], label='Lower Bollinger Band')
+    if 'train_predict' in signals.columns and 'test_predict' in signals.columns:
+        plt.plot(signals.index, signals['train_predict'], label='Train Predict')
+        plt.plot(signals.index, signals['test_predict'], label='Test Predict')
     if 'positions' in signals.columns:
         plt.plot(signals.loc[signals.positions == 1.0].index, 
                  signals.price[signals.positions == 1.0],

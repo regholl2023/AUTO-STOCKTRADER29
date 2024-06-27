@@ -34,7 +34,7 @@
             font-size: 16px;
         }
         .form-backtest .form-control:focus {
-            z-index: 2;
+            z-index: 2.
         }
         .form-backtest button {
             margin-top: 10px;
@@ -98,6 +98,7 @@
                         <option value="rsi" {% if request.args.get('strategy') == 'rsi' %}selected{% endif %}>Relative Strength Index (RSI)</option>
                         <option value="macd" {% if request.args.get('strategy') == 'macd' %}selected{% endif %}>Moving Average Convergence Divergence (MACD)</option>
                         <option value="bollinger_bands" {% if request.args.get('strategy') == 'bollinger_bands' %}selected{% endif %}>Bollinger Bands</option>
+                        <option value="lstm" {% if request.args.get('strategy') == 'lstm' %}selected{% endif %}>Long Short-Term Memory (LSTM)</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Run Backtest</button>
